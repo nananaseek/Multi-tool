@@ -83,10 +83,8 @@ async def save_file(file: UploadFile, file_location: str) -> bool:
     file.file.read() для створення контенту, який потрібно записати, 
     тоді створює buffer, який використовує open() та write() для запису у файл контенту.
     """
-    if check_file_exists(file_location):
-        return False
-    else:
-        content = file.file.read()
-        with open(file_location, 'wb') as buffer:
-            buffer.write(content)
-        return True
+
+    content = file.file.read()
+    with open(file_location, 'wb') as buffer:
+        buffer.write(content)
+    return True

@@ -22,7 +22,7 @@ python -m uvicorn app.main:app --log_level="info" --reload
 - Для конвертування зображень було використано бібліотеку [Pillow](https://pillow.readthedocs.io/en/stable/)
 
 # Автори
-Github: @nananaseek
+Github: [@nananaseek](https://github.com/nananaseek)
 Telegram: @ehita
 
 # TODO 

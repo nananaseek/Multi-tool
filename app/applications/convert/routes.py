@@ -9,7 +9,10 @@ from app.settings.config import settings
 from app.core.utils import delete_file_after_delay, \
     create_folder, \
     save_file, \
-    check_file_exists
+    check_file_exists, \
+    get_audio_media_type, \
+    get_image_media_type
+
 
 from app.applications.convert.utils import convert_audio, convert_image
 
@@ -23,13 +26,13 @@ temp_folder = settings.TEMP_FOLDER
 
     
 @router.post("/audio", status_code=200, tags=['Convertor'])
-async def converting_audio(file: UploadFile = File(...), format: Optional[str] = "mp3"):
+async def converting_audio(file: UploadFile = File(...), file_format: Optional[str] = "mp3"):
     """
     Конвертує вхідний аудіофайл у вказаний формат та повертає вихідний аудіофайл.
 
     Args:
     - file: UploadFile = File(...): вхідний аудіофайл
-    - format: Optional[str] = "mp3": формат вихідного аудіофайлу (за замовчуванням 'mp3')
+    - file_format: Optional[str] = "mp3": формат вихідного аудіофайлу (за замовчуванням 'mp3')
 
     :return: вихідний аудіофайл у вказаному форматі
     :raises HTTPException: якщо сталася помилка при конвертуванні файлу
@@ -45,13 +48,12 @@ async def converting_audio(file: UploadFile = File(...), format: Optional[str] =
     name_without_extension = os.path.splitext(name_file)[0]
 
     # conv_file_name - назва файлу після конвертації з розширенням.
-    conv_file_name = f'{name_without_extension}.{format}'
+    conv_file_name = f'{name_without_extension}.{file_format}'
 
     # full_path_converted_file - повний шлях до файлу після конвертації з розширенням.
     full_path_converted_file = f'{temp_folder}{conv_file_name}'
+  
 
-    
-    
     try:
         # Перевіряємо, чи існує папка temp і створюємо її, якщо не існує
         await create_folder(temp_folder)
@@ -63,9 +65,11 @@ async def converting_audio(file: UploadFile = File(...), format: Optional[str] =
         if not await check_file_exists(full_path_converted_file):
             converted_file = await convert_audio(
                                 input_file=file_location,
-                                output_format=format,
+                                output_format=file_format,
                                 temp_folder=temp_folder,
                                 name_file=name_without_extension)
+        else:
+            converted_file = full_path_converted_file
                 
         # Включаємо автовидалення файлів користувача після того як пройшов деякий час
         task = asyncio.create_task(delete_file_after_delay(
@@ -77,18 +81,7 @@ async def converting_audio(file: UploadFile = File(...), format: Optional[str] =
         return FileResponse(
             path=converted_file, 
             filename=conv_file_name, 
-            media_type=lambda format: {
-                                'mp3': 'audio/mpeg',
-                                'wav': 'audio/wav',
-                                'ogg': 'audio/ogg',
-                                'flac': 'audio/flac',
-                                'aac': 'audio/aac',
-                                'wma': 'audio/x-ms-wma',
-                                'aiff': 'audio/aiff',
-                                'au': 'audio/basic',
-                                'm4a': 'audio/mp4',
-                                'opus': 'audio/opus',
-                            }.get(format.lower(), 'application/octet-stream')
+            media_type= await get_audio_media_type(file_format)
             )
         
     except Exception as e:
@@ -96,13 +89,13 @@ async def converting_audio(file: UploadFile = File(...), format: Optional[str] =
     
 
 @router.post("/picture", status_code=200, tags=['Convertor'])
-async def converting_picture(file: UploadFile = File(...), format: Optional[str] = "jpeg"):
+async def converting_picture(file: UploadFile = File(...), file_format: Optional[str] = "jpeg"):
     """
     Конвертує вхідний аудіофайл у вказаний формат та повертає вихідний аудіофайл.
 
     Args:
     - file: UploadFile = File(...): вхідний аудіофайл
-    - format: Optional[str] = "jpeg": формат вихідного аудіофайлу (за замовчуванням 'jpeg')
+    - file_format: Optional[str] = "jpeg": формат вихідного аудіофайлу (за замовчуванням 'jpeg')
 
     :return: вихідний аудіофайл у вказаному форматі
     :raises HTTPException: якщо сталася помилка при конвертуванні файлу
@@ -118,7 +111,7 @@ async def converting_picture(file: UploadFile = File(...), format: Optional[str]
     name_without_extension = os.path.splitext(name_file)[0]
 
     # conv_file_name - назва файлу після конвертації з розширенням.
-    conv_file_name = f'{name_without_extension}.{format}'
+    conv_file_name = f'{name_without_extension}.{file_format}'
 
     # full_path_converted_file - повний шлях до файлу після конвертації з розширенням.
     full_path_converted_file = f'{temp_folder}{conv_file_name}'
@@ -134,8 +127,9 @@ async def converting_picture(file: UploadFile = File(...), format: Optional[str]
             await save_file(file=file, file_location=file_location)
 
         if not await check_file_exists(full_path_converted_file):
-            converted_file = await convert_image(input_filename=file_location, output_format=format)
-        
+            converted_file = await convert_image(input_filename=file_location, output_format=file_format)
+        else:
+            converted_file = full_path_converted_file
             
         # Включаємо автовидалення файлів користувача після того як пройшов деякий час
         task = asyncio.create_task(delete_file_after_delay(
@@ -147,16 +141,7 @@ async def converting_picture(file: UploadFile = File(...), format: Optional[str]
         return FileResponse(
             path=converted_file, 
             filename=conv_file_name, 
-            media_type =lambda format: (
-                                'image/jpeg' if format.lower() == 'jpeg' else
-                                'image/png' if format.lower() == 'png' else
-                                'image/gif' if format.lower() == 'gif' else
-                                'image/svg+xml' if format.lower() in ['svg', 'xml'] else
-                                'image/tiff' if format.lower() == 'tiff' else
-                                'image/vnd.microsoft.icon' if format.lower() == 'icon' else
-                                'image/webp'
-                            )
-
+            media_type = await get_image_media_type(file_format)
             )
         
     except Exception as e:
