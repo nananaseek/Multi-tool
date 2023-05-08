@@ -11,14 +11,14 @@ async def get_image_media_type (file_format: str) -> str:
     Raises:
         ValueError: якщо формат файлу невідомий.
     """
-    match file_format.split():
+    match file_format.lower().split():
         case ['jpeg' | 'jpg']:
             return 'image/jpeg'
         case ['png']:
             return 'image/png'
         case ['gif']:
             return 'image/gif'
-        case ['svg'], 'xml':
+        case ['svg' | 'xml']:
             return 'image/svg+xml'
         case ['tiff']:
             return 'image/tiff'
@@ -31,13 +31,17 @@ async def get_image_media_type (file_format: str) -> str:
 
 
 async def get_audio_media_type(file_format: str) -> str:
-    """Повертає media type для аудіо формату
+    """
+    Функція повертає media type відповідно до формату файлу.
 
     Args:
-        file_format (str): Формат аудіо файлу.
+        file_format: str - формат файлу.
 
     Returns:
-        str: Media type аудіо файлу.
+        str - media type.
+
+    Raises:
+        ValueError: якщо формат файлу невідомий.
     """
     match file_format.lower():
         case 'mp3':
@@ -62,3 +66,36 @@ async def get_audio_media_type(file_format: str) -> str:
             return 'audio/opus'
         case _:
             return 'application/octet-stream'
+
+async def get_video_media_type (file_format: str) -> str:
+    """
+    Функція повертає media type відповідно до формату файлу.
+
+    Args:
+        file_format: str - формат файлу.
+
+    Returns:
+        str - media type.
+
+    Raises:
+        ValueError: якщо формат файлу невідомий.
+    """
+    match file_format.lower().split():
+        case ["mpg" | "mpeg" | "mp1" | "mp2" | "mp3" | "m1v" | "mpv" | "m1a" | "m2a"  | "mpa"]:
+            return 'video/mpeg'
+        case ['mp4' | "m4a" | "m4v" | "f4v" | "f4a" | "m4b" | "m4r" | "f4b" | "mov"]:
+            return 'video/mp4'
+        case ['ogg' | 'ogv' | 'oga' | 'ogx' | 'spx' | 'opus' ]:
+            return 'video/ogg'
+        case ['webm']:
+            return 'video/webm'
+        case ['wmv']:
+            return 'video/x-ms-wmv'
+        case ['avi']:
+            return 'video/x-msvideo'
+        case ['3gpp' | '3gp']:
+            return 'video/3gpp'
+        case ['3gpp2' | '3g2']:
+            return 'video/3gpp2'
+        case _:
+            raise ValueError(f'Unknown file format: {file_format}')
