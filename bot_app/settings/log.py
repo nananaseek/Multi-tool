@@ -1,33 +1,15 @@
-from dotenv import load_dotenv
-
-import os
 import logging.config
-
-
-# Визначте шлях до файлу .env в папці config
-env_path = os.path.join("config", ".env")
-
-# Завантажте змінні середовища з файлу .env
-load_dotenv(dotenv_path=env_path)
-
-# Передавання токену в бота
-TOKEN = os.getenv('TOKEN')
-# Перемикач режима відладки
-DEBUG = os.getenv('DEBUG')
-
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
-LOGS_ROOT = os.path.join(PROJECT_ROOT, "bot_app/logs")
-TEMP_FOLDER = f"{PROJECT_ROOT}/temp/" 
+from .conf import settings
 
 DEFAULT_LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'filters': {
         'require_debug_false': {
-            '()': 'app.settings.log.RequireDebugFalse',
+            '()': 'bot_app.settings.log.RequireDebugFalse',
         },
         'require_debug_true': {
-            '()': 'app.settings.log.RequireDebugTrue',
+            '()': 'bot_app.settings.log.RequireDebugTrue',
         },
     },
     'formatters': {
@@ -38,16 +20,22 @@ DEFAULT_LOGGING = {
         },
     },
     'handlers': {
-        'console': {
+        'console_debug': {
             'level': 'DEBUG',
             'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'main_formatter',
+        },
+        'console_production': {
+            'level': 'INFO',
+            'filters': ['require_debug_false'],
             'class': 'logging.StreamHandler',
             'formatter': 'main_formatter',
         },
         'production_file': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': f'{LOGS_ROOT}/bot_main.log',
+            'filename': f'{settings.LOGS_ROOT}/bot_main.log',
             'maxBytes': 1024 * 1024 * 10,
             'backupCount': 10,
             'formatter': 'main_formatter',
@@ -56,7 +44,7 @@ DEFAULT_LOGGING = {
         'debug_file': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': f'{LOGS_ROOT}/bot_main_debug.log',
+            'filename': f'{settings.LOGS_ROOT}/bot_main_debug.log',
             'maxBytes': 1024 * 1024 * 10,
             'backupCount': 10,
             'formatter': 'main_formatter',
@@ -65,19 +53,18 @@ DEFAULT_LOGGING = {
     },
     'loggers': {
         '': {
-            'handlers': ['console', 'production_file', 'debug_file'],
+            'handlers': ['console_debug','console_production', 'production_file', 'debug_file'],
             'level': "DEBUG",
         },
 
     }
 }
 
-
 class RequireDebugFalse(logging.Filter):
     def filter(self, record):
-        return not DEBUG
+        return not settings.DEBUG
 
 
 class RequireDebugTrue(logging.Filter):
     def filter(self, record):
-        return DEBUG
+        return settings.DEBUG

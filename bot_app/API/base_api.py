@@ -1,5 +1,6 @@
 from aiohttp import ClientSession
 
+
 class ApiClient:
     def __init__(self):
         self.session = ClientSession()
