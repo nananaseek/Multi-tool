@@ -18,13 +18,13 @@ pip install -r requirements.txt
 ```bash
 python -m uvicorn app.main:app --log_level="info" --reload
 ```
-Також для запуску бота потрібно прописати у консолі:
-```bash
-python start_bot.py
-```
 Або запустити файл `run.py`
 ```bash
 python run.py
+```
+Також для запуску бота потрібно прописати у консолі:
+```bash
+python start_bot.py
 ```
 
 У браузері можно перейти по шляху *localhost:8000/docs* для того щоб відкрити документацію API у якій описані реалізовані API
