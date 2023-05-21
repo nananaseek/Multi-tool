@@ -1,4 +1,4 @@
-from aiogram.types import File
+from aiogram.types import File, Audio
 
 from io import BytesIO
 

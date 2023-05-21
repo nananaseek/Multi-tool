@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.core.exceptions import SettingNotFound
-from app.core.init_app import configure_logging, register_exceptions, register_routers, register_db
+from app.core.init_app import configure_logging, register_exceptions, register_routers
 
 try:
     from app.settings.config import settings

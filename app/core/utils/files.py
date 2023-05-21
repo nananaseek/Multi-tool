@@ -3,9 +3,11 @@ import asyncio
 import logging
 
 from fastapi import HTTPException, UploadFile
+from ffprobe import FFProbe
 
 
-async def delete_file_after_delay(orig_file_path: str, conv_file_path: str, delay: int = 60) -> None: 
+
+async def delete_file_after_delay(orig_file_path: str, conv_file_path: str, delay: int = 10) -> None: 
     """
     Асинхронна функція, що видаляє файл з затримкою.
 
@@ -60,13 +62,15 @@ async def check_file_exists(file_location: str) -> bool:
 
     Функція використовує метод os.path.exists() для перевірки чи існує файл.
     """
+        
     if os.path.exists(file_location):
         logging.info(f"Файл {file_location} існує.")
         return True
     else:
         logging.warning(f"Файл {file_location} не існує.")
         return False
-
+    
+        
 
 async def save_file(file: UploadFile, file_location: str) -> bool:
     """
@@ -83,8 +87,9 @@ async def save_file(file: UploadFile, file_location: str) -> bool:
     file.file.read() для створення контенту, який потрібно записати, 
     тоді створює buffer, який використовує open() та write() для запису у файл контенту.
     """
-
+    
     content = file.file.read()
     with open(file_location, 'wb') as buffer:
         buffer.write(content)
+    
     return True

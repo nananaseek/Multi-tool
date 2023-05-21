@@ -16,7 +16,8 @@ class Settings:
     DEBUG = bool(os.getenv('DEBUG'))
 
     ENDPOINT = 'http://127.0.0.1:8000/'
-    AUDIO_CONV_ENDPOINT = ENDPOINT + 'audio'
+    CONVERTOR_ENDPOINT = ENDPOINT + 'convertor/'
+    AUDIO_ENDPOINT = CONVERTOR_ENDPOINT + 'audio'
 
 
     PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
