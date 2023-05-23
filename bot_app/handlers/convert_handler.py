@@ -115,6 +115,9 @@ async def videoformatHandler(message: types.Message, state: FSMContext):
     
 """
 Функції для обробки фотографій
+
+TODO 
+ - переробити скачку фотографії як фотографії а не документа
 """
 
 @dp.message_handler(content_types=types.ContentType.DOCUMENT, state=PhotoHandler.file_handler)
