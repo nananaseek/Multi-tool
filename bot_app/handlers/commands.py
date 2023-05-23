@@ -7,14 +7,25 @@ import logging
 from ..app import dp
 from ..core.message import *
 from ..keyboards.inline import *
+from ..states import VoiceAndVideo
 
 
 @dp.message_handler(commands="start")
 async def cmd_start(message: types.Message):
     await message.answer(START_MESS,
                          parse_mode='HTML',
-                         reply_markup=generate_inline_keyboard())
+                        )
 
+@dp.message_handler(commands='convert')
+async def convert_mess(message: types.Message):
+    await message.answer(CONVERT_MESSAGE,
+                         reply_markup=chosse_format_file())
+
+@dp.message_handler(commands='download')
+async def convert_mess(message: types.Message, state: FSMContext):
+    await message.answer(DOWNLOAD_MESSAGE)
+    await VoiceAndVideo.file_handler.set()
+    
 # Функція для виходу зі сценарія при команді /cancel
 # You can use state '*' if you need to handle all states
 @dp.message_handler(state='*', commands='cancel')

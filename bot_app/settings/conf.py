@@ -18,6 +18,8 @@ class Settings:
     ENDPOINT = 'http://127.0.0.1:8000/'
     CONVERTOR_ENDPOINT = ENDPOINT + 'convertor/'
     AUDIO_ENDPOINT = CONVERTOR_ENDPOINT + 'audio'
+    VIDEO_ENDPOINT = CONVERTOR_ENDPOINT + 'video'
+    PHOTO_ENDPOINT = CONVERTOR_ENDPOINT + 'picture'
 
 
     PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))

@@ -1,6 +1,5 @@
 import aiohttp
 
-from ..base_api import ApiClient
 from ...settings.conf import settings
 
 

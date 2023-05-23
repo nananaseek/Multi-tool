@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-def generate_inline_keyboard():
+def chosse_format_file():
     keyboard = InlineKeyboardMarkup(row_width=2)
     audio_button = InlineKeyboardButton("Аудіо", callback_data="audio")
     video_button = InlineKeyboardButton("Відео", callback_data="video")

@@ -94,7 +94,7 @@ async def converting_audio(file: UploadFile = File(...), extra_file_name: str = 
     
 
 @router.post("/picture", status_code=200, tags=['Convertor'])
-async def converting_picture(file: UploadFile = File(...), file_format: Optional[str] = "jpeg"):
+async def converting_picture(file: UploadFile = File(...), extra_file_name: str = None, file_format: Optional[str] = "jpeg"):
     """
     Конвертує вхідний аудіофайл у вказаний формат та повертає вихідний аудіофайл.
 
@@ -107,7 +107,7 @@ async def converting_picture(file: UploadFile = File(...), file_format: Optional
     """
 
     # file_location - шлях до файлу з назвою файла.
-    file_location = f"{temp_folder}{file.filename}"
+    file_location = f"{temp_folder}{file.filename}"if not extra_file_name else f"{temp_folder}{extra_file_name}"
     
     # name_file - назва файла без шляху до нього.
     name_file = file_location.split("/")[-1]
