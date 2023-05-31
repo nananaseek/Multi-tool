@@ -7,6 +7,7 @@ from app.core.exceptions import APIException, on_api_exception
 from app.settings.config import settings
 from app.settings.log import DEFAULT_LOGGING
 from app.applications.convert.routes import router as convertor
+from app.applications.media_type.routers import router as media_type
 
 
 def configure_logging(log_settings: dict = None):
@@ -54,5 +55,5 @@ def register_exceptions(app: FastAPI):
 
 def register_routers(app: FastAPI):
     app.include_router(convertor, prefix='/convertor')
-    # app.include_router(login_router, prefix='/api/auth/login')
+    app.include_router(media_type, prefix='/type')
     # app.include_router(users_router, prefix='/api/auth/users')

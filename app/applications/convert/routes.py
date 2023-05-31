@@ -2,7 +2,13 @@ import os
 import asyncio
 
 from typing import List, Optional
-from fastapi import APIRouter, UploadFile, File, HTTPException, UploadFile, Response
+from fastapi import APIRouter, \
+    UploadFile, \
+    File, \
+    HTTPException, \
+    UploadFile, \
+    Response
+
 from fastapi.responses import StreamingResponse, FileResponse
 from app.settings.config import settings
 
@@ -27,7 +33,7 @@ router = APIRouter()
 
 temp_folder = settings.TEMP_FOLDER
 
-    
+
 @router.post("/audio", status_code=200, tags=['Convertor'])
 async def converting_audio(file: UploadFile = File(...), extra_file_name: str = None, file_format: Optional[str] = "mp3"):
     """

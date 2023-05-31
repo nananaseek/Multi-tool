@@ -21,6 +21,12 @@ class Settings:
     VIDEO_ENDPOINT = CONVERTOR_ENDPOINT + 'video'
     PHOTO_ENDPOINT = CONVERTOR_ENDPOINT + 'picture'
 
+    MEDIA_TYPE_ENDPOINT = ENDPOINT + 'type/'
+    AUDIO_TYPE_ENDPOINT = MEDIA_TYPE_ENDPOINT + 'audio'
+    VIDEO_TYPE_ENDPOINT = MEDIA_TYPE_ENDPOINT + 'video'
+    PHOTO_TYPE_ENDPOINT = MEDIA_TYPE_ENDPOINT + 'image'
+    
+
 
     PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
     LOGS_ROOT = os.path.join(PROJECT_ROOT, "logs")

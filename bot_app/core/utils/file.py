@@ -28,3 +28,9 @@ async def download_and_send_video_note(file_id: str) -> BytesIO:
 
     # Відправка голосового повідомлення назад у чат
     return video_note_data
+
+async def fix_file_name(original_file_name: str, new_file_format: str) -> str:
+    file_name_without_format = original_file_name.split('.')[0]
+    file_name_update_format = f'{file_name_without_format}.{new_file_format}'
+    
+    return file_name_update_format
