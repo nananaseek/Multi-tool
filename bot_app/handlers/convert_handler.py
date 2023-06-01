@@ -10,11 +10,15 @@ from ..core.utils.file import save_file_to_memory, fix_file_name
 from ..API import get_file_type
 from ..API.convertor import convert_audio, convert_video, convert_photo
 from bot_app.keyboards.inline.chosse_format_file import FileTypeKeyboard
+from bot_app.core.message import USER_CHOOSE_FORMATS
 
 
-@dp.message_handler(content_types=types.ContentType.VOICE, state=AudioHandler.file_handler)
+# @dp.message_handler(content_types=types.ContentType.VOICE, state=AudioHandler.file_handler)
 @dp.message_handler(content_types=types.ContentType.AUDIO, state=AudioHandler.file_handler)
 async def handle_audio_message(message: types.Message, state: FSMContext):
+    """
+    Обробник аудіо повідомлень.
+    """
     try:
         global audio_type
         # Отримуємо аудіо, на яке відповідає користувач
@@ -27,15 +31,15 @@ async def handle_audio_message(message: types.Message, state: FSMContext):
         # Зберігаємо аудіо в оперативну пам'ять
         audio_bytes = await save_file_to_memory(audio)
         
-        # Передаємо файл у контейнер сценарія що б потім можно було достати його з відти 
+        # Передаємо файл у контейнер сценарія, щоб потім можна було отримати його звідти
         await state.update_data(audio=audio_bytes.getvalue())
         await state.update_data(origin_file_name=audio.file_name)
         await state.update_data(title=audio.title)
         await state.update_data(performer=audio.performer)
         await state.update_data(duration=audio.duration)
-        await state.update_data(thumb=audio.thumb)
+        await state.update_data(thumb=audio.thumb.file_id)
         
-        await message.answer('вибери формат на який хочеш конвертувати свій файл або напишіть свій формат ☺️',
+        await message.answer(USER_CHOOSE_FORMATS,
                              reply_markup=audio_keyboard
                              )  
         await AudioHandler.next()    
@@ -46,7 +50,9 @@ async def handle_audio_message(message: types.Message, state: FSMContext):
 
 @dp.message_handler(content_types=types.ContentType.TEXT, state=AudioHandler.format_handler)
 async def formatHandler(message: types.Message, state: FSMContext):
-    
+    """
+    Обробник повідомлень з вибором формату аудіофайлу.
+    """
     format_file = message.text
     
     async with state.proxy() as data:
@@ -82,6 +88,9 @@ async def formatHandler(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(lambda c: c.data in [type_name.lower() for type_name in audio_type.get_types()], state=AudioHandler.format_handler)
 async def handle_audio_format(callback_query: types.CallbackQuery, state: FSMContext):
+    """
+    Обробник вибору формату аудіофайлу через клавіші.
+    """
     selected_format = callback_query.data
 
     async with state.proxy() as data:
@@ -93,15 +102,15 @@ async def handle_audio_format(callback_query: types.CallbackQuery, state: FSMCon
         thumb = data['thumb']
         
         converted_file = await convert_audio(
-                                            file=data['audio'], 
-                                            file_format=selected_format, 
-                                            origin_file_name=file_name
-                                            )
+                                    file=data['audio'], 
+                                    file_format=selected_format, 
+                                    origin_file_name=file_name
+                                    )
         
     is_title = title if data['title'] else await fix_file_name(
-                                                                original_file_name=file_name,
-                                                                new_file_format=selected_format
-                                                                )
+                                                    original_file_name=file_name,
+                                                    new_file_format=selected_format
+                                                    )
     await callback_query.message.answer_audio(
                                 converted_file, 
                                 title=is_title, 
@@ -115,14 +124,12 @@ async def handle_audio_format(callback_query: types.CallbackQuery, state: FSMCon
     
 
 
-"""
-Функції для обробки відео повідоммлень
-"""
-
-
 @dp.message_handler(content_types=types.ContentType.DOCUMENT, state=VideoHandler.file_handler)
 @dp.message_handler(content_types=types.ContentType.VIDEO, state=VideoHandler.file_handler)
 async def handle_video_message(message: types.Message, state: FSMContext):
+    """
+    Обробник відео повідомлень.
+    """
     try:
         global video_type
         media_type_video = await get_file_type('video')
@@ -136,7 +143,7 @@ async def handle_video_message(message: types.Message, state: FSMContext):
         # Зберігаємо аудіо в оперативну пам'ять
         video_bytes = await save_file_to_memory(video)
         
-        # Передаємо файл у контейнер сценарія що б потім можно було достати його з відти 
+        # Передаємо файл у контейнер сценарія, щоб потім можна було отримати його звідти 
         await state.update_data(video=video_bytes.getvalue())
         if is_video:
             await state.update_data(duration=video.duration)
@@ -146,7 +153,7 @@ async def handle_video_message(message: types.Message, state: FSMContext):
         else:
             await state.update_data(is_video=is_video)
         
-        await message.answer('напиши формат на який хочеш конвертувати свій файл ☺️',
+        await message.answer(USER_CHOOSE_FORMATS,
                              reply_markup=video_keyboard)  
         await VideoHandler.next()    
           
@@ -156,7 +163,9 @@ async def handle_video_message(message: types.Message, state: FSMContext):
 
 @dp.message_handler(content_types=types.ContentType.TEXT, state=VideoHandler.format_handler)
 async def videoformatHandler(message: types.Message, state: FSMContext): 
-    
+    """
+    Обробник повідомлень з вибором формату відеофайлу.
+    """
     format_file = message.text
     
     async with state.proxy() as data:
@@ -168,18 +177,30 @@ async def videoformatHandler(message: types.Message, state: FSMContext):
             height = data['height']
             width = data['width']
         
-        converted_file = await convert_video(file=data['video'], file_format=format_file)
+        converted_file = await convert_video(file=data['video'], 
+                                             file_format=format_file
+                                             )
             
     if is_video:
-        await message.answer_video(converted_file,  duration=duration, height=height, width=width, allow_sending_without_reply=True )
+        await message.answer_video(converted_file, 
+                                    duration=duration, 
+                                    height=height, 
+                                    width=width, 
+                                    allow_sending_without_reply=True 
+                                    )
     else:
-        await message.answer_video(converted_file, allow_sending_without_reply=True )
+        await message.answer_video(converted_file, 
+                                   allow_sending_without_reply=True 
+                                   )
         
     await state.finish()
     
     
 @dp.callback_query_handler(lambda c: c.data in [type_name.lower() for type_name in video_type.get_types()], state=VideoHandler.format_handler)
-async def handle_audio_format(callback_query: types.CallbackQuery, state: FSMContext):
+async def handle_video_format(callback_query: types.CallbackQuery, state: FSMContext):
+    """
+    Обробник вибору формату відеофайлу за допомогою inline-кнопок.
+    """
     selected_format = callback_query.data
     
     async with state.proxy() as data:
@@ -191,22 +212,30 @@ async def handle_audio_format(callback_query: types.CallbackQuery, state: FSMCon
             height = data['height']
             width = data['width']
         
-        converted_file = await convert_video(file=data['video'], file_format=selected_format)
+        converted_file = await convert_video(file=data['video'], 
+                                             file_format=selected_format
+                                             )
             
     if is_video:
-        await callback_query.message.answer_video(converted_file,  duration=duration, height=height, width=width, allow_sending_without_reply=True )
+        await callback_query.message.answer_video(converted_file,  
+                                                  duration=duration, 
+                                                  height=height, 
+                                                  width=width, 
+                                                  allow_sending_without_reply=True 
+                                                  )
     else:
-        await callback_query.message.answer_video(converted_file, allow_sending_without_reply=True )
+        await callback_query.message.answer_video(converted_file, 
+                                                  allow_sending_without_reply=True 
+                                                  )
         
     await state.finish()
     
     
-"""
-Функції для обробки фотографій
-"""
-
 @dp.message_handler(content_types=types.ContentType.DOCUMENT, state=PhotoHandler.file_handler)
 async def handle_photo_message(message: types.Message, state: FSMContext):
+    """
+    Обробник фотографій.
+    """
     try:
         global photo_type
         media_type_photo = await get_file_type('photo')
@@ -221,14 +250,14 @@ async def handle_photo_message(message: types.Message, state: FSMContext):
         # Зберігаємо аудіо в оперативну пам'ять
         photo_bytes = await save_file_to_memory(photo)
         
-        # Передаємо файл у контейнер сценарія що б потім можно було достати його з відти 
+        # Передаємо файл у контейнер сценарія, щоб потім можна було отримати його звідти 
         if is_photo:
             pass
         else:
             await state.update_data(photo=photo_bytes.getvalue())
             await state.update_data(origin_file_name=photo.file_name)
         
-        await message.answer('напиши формат на який хочеш конвертувати свій файл ☺️', 
+        await message.answer(USER_CHOOSE_FORMATS, 
                             reply_markup= photo_keyboard)  
         await PhotoHandler.next()    
           
@@ -238,15 +267,19 @@ async def handle_photo_message(message: types.Message, state: FSMContext):
 
 @dp.message_handler(content_types=types.ContentType.TEXT, state=PhotoHandler.format_handler)
 async def photoformatHandler(message: types.Message, state: FSMContext): 
-    
-    
+    """
+    Обробник повідомлень з вибором формату фотофайлу.
+    """
     format_file = message.text
     
     async with state.proxy() as data:
         
         file_name = data['origin_file_name']
         
-        converted_file = await convert_photo(file=data['photo'], origin_file_name=file_name, file_format=format_file)
+        converted_file = await convert_photo(file=data['photo'], 
+                                             origin_file_name=file_name, 
+                                             file_format=format_file
+                                             )
             
 
     await message.answer_document(converted_file, allow_sending_without_reply=True)
@@ -255,7 +288,10 @@ async def photoformatHandler(message: types.Message, state: FSMContext):
     
     
 @dp.callback_query_handler(lambda c: c.data in [type_name.lower() for type_name in photo_type.get_types()], state=PhotoHandler.format_handler)
-async def handle_audio_format(callback_query: types.CallbackQuery, state: FSMContext):
+async def handle_photo_format(callback_query: types.CallbackQuery, state: FSMContext):
+    """
+    Обробник вибору формату фотофайлу за допомогою inline-кнопок.
+    """
     selected_format = callback_query.data
     
     
@@ -263,9 +299,14 @@ async def handle_audio_format(callback_query: types.CallbackQuery, state: FSMCon
         
         file_name = data['origin_file_name']
         
-        converted_file = await convert_photo(file=data['photo'], origin_file_name=file_name, file_format=selected_format)
+        converted_file = await convert_photo(file=data['photo'], 
+                                             origin_file_name=file_name, 
+                                             file_format=selected_format
+                                             )
             
 
-    await callback_query.message.answer_document(converted_file, allow_sending_without_reply=True)
+    await callback_query.message.answer_document(converted_file, 
+                                                allow_sending_without_reply=True
+                                                )
         
     await state.finish()
