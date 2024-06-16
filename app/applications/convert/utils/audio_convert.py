@@ -21,11 +21,13 @@ async def is_convertible_to_audio(file_path: str) -> bool:
     try:
         loop = asyncio.get_running_loop()
         mediainfo_data = await loop.run_in_executor(None, mediainfo, file_path)
+        logging.debug(mediainfo_data)
     except CouldntDecodeError as e:
         logging.error(f'File: {file_path} get error, {e}')
         return False
 
-    return mediainfo_data.get("codec_type") == "audio"
+    return mediainfo_data.get("codec_type") == "audio" or 'video'
+
 
 async def convert_audio(input_file: str, output_format: str, temp_folder: str, name_file: str) -> str:
     """
@@ -35,6 +37,7 @@ async def convert_audio(input_file: str, output_format: str, temp_folder: str, n
     :param output_format: формат вихідного файлу
     :return: шлях до вихідного аудіофайлу
     """
+    
 
     input_format = input_file.split(".")[-1]
     if await is_convertible_to_audio(file_path=input_file):
@@ -42,4 +45,5 @@ async def convert_audio(input_file: str, output_format: str, temp_folder: str, n
         output_file = f"{temp_folder}{name_file}.{output_format}"
         audio.export(output_file, format=output_format)
 
+    logging.debug(await is_convertible_to_audio(file_path=output_file))
     return output_file

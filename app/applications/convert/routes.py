@@ -2,7 +2,13 @@ import os
 import asyncio
 
 from typing import List, Optional
-from fastapi import APIRouter, UploadFile, File, HTTPException, UploadFile, Response
+from fastapi import APIRouter, \
+    UploadFile, \
+    File, \
+    HTTPException, \
+    UploadFile, \
+    Response
+
 from fastapi.responses import StreamingResponse, FileResponse
 from app.settings.config import settings
 
@@ -27,9 +33,9 @@ router = APIRouter()
 
 temp_folder = settings.TEMP_FOLDER
 
-    
+
 @router.post("/audio", status_code=200, tags=['Convertor'])
-async def converting_audio(file: UploadFile = File(...), file_format: Optional[str] = "mp3"):
+async def converting_audio(file: UploadFile = File(...), extra_file_name: str = None, file_format: Optional[str] = "mp3"):
     """
     Конвертує вхідний аудіофайл у вказаний формат та повертає вихідний аудіофайл.
 
@@ -40,9 +46,11 @@ async def converting_audio(file: UploadFile = File(...), file_format: Optional[s
     :return: вихідний аудіофайл у вказаному форматі
     :raises HTTPException: якщо сталася помилка при конвертуванні файлу
     """
-
+    # extra_file_name - додаткова назва файлу у випадку якщо назви не буде у самомму файлі
+    
+    
     # file_location - шлях до файлу з назвою файла.
-    file_location = f"{temp_folder}{file.filename}"
+    file_location = f"{temp_folder}{file.filename}"if not extra_file_name else f"{temp_folder}{extra_file_name}"
     
     # name_file - назва файла без шляху до нього.
     name_file = file_location.split("/")[-1]
@@ -92,7 +100,7 @@ async def converting_audio(file: UploadFile = File(...), file_format: Optional[s
     
 
 @router.post("/picture", status_code=200, tags=['Convertor'])
-async def converting_picture(file: UploadFile = File(...), file_format: Optional[str] = "jpeg"):
+async def converting_picture(file: UploadFile = File(...), extra_file_name: str = None, file_format: Optional[str] = "jpeg"):
     """
     Конвертує вхідний аудіофайл у вказаний формат та повертає вихідний аудіофайл.
 
@@ -105,7 +113,7 @@ async def converting_picture(file: UploadFile = File(...), file_format: Optional
     """
 
     # file_location - шлях до файлу з назвою файла.
-    file_location = f"{temp_folder}{file.filename}"
+    file_location = f"{temp_folder}{file.filename}"if not extra_file_name else f"{temp_folder}{extra_file_name}"
     
     # name_file - назва файла без шляху до нього.
     name_file = file_location.split("/")[-1]

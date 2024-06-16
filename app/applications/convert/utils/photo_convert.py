@@ -28,7 +28,7 @@ async def convert_image(input_filename: str, output_format: str) -> str:
     :param output_format: Розширення, до якого має бути конвертовано зображення
     :return: Шлях до нового файлу зображення
     """
-    if not can_convert_to_format(input_filename, output_format):
+    if not await can_convert_to_format(input_filename, output_format):
         logging.warning(f"Файл {input_filename} не може бути конвертований до формату {output_format}.")
         return None
 
